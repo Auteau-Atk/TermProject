@@ -33,15 +33,20 @@ class Product(db.Model):
             'price': self.price,
             'balance': self.balance
         }
-
+    
 class Order(db.Model): 
     id = mapped_column(Integer, primary_key=True)
     customer_id = mapped_column(Integer, ForeignKey(Customer.id), nullable=False) 
     total = mapped_column(Numeric, nullable=True)
     customer = relationship("Customer", back_populates="orders")
 
+    product_orders = relationship("ProductOrder")
+    
 class ProductOrder(db.Model):
     id = mapped_column(Integer, primary_key=True)
     order_id = mapped_column(Integer, ForeignKey(Order.id), nullable=False)
     product_id = mapped_column(Integer, ForeignKey(Product.id), nullable=False)
     quantity = mapped_column(Integer, nullable=False)
+
+    order = relationship("Order", back_populates="product_orders")
+    product = relationship("Product", back_populates="product_orders")

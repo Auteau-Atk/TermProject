@@ -32,20 +32,37 @@ def import_data_from_csv(customers_csv_path, products_csv_path):
         db.session.commit()
 def randomize_orders():
     with app.app_context():
-        random_cust = db.select(Customer).order_by(func.random()).limit(1)
-        cust_records = db.session.execute(random_cust).scalar()
 
-        random_prod = db.select(Product).order_by(func.random()).limit(1)
-        prod_records = db.session.execute(random_prod).scalar()
-
-        product_order = ProductOrder(customer_id = cust_records.id, 
-                                    product_id = prod_records.id, 
-                                    quantity = random.randint(0, 20))
-        db.session.commit()
+        rand_qty = random.randint(10, 20) 
+        # Find a random customer 
+        cust_stmt = db.select(Customer).order_by(func.random()).limit(1) 
+        customer = db.session.execute(cust_stmt).scalar() 
+        
+        # Make an order 
+        order = Order(customer=customer, total=rand_qty) 
+        db.session.add(order) 
+        
+        # Find a random product 
+        prod_stmt = db.select(Product).order_by(func.random()).limit(1) 
+        product = db.session.execute(prod_stmt).scalar() 
+        
+        # Add that product to the order 
+        association_1 = ProductOrder(order=order, product=product, quantity=rand_qty) 
+        db.session.add(association_1) 
+        
+        # Do it again 
+        prod_stmt = db.select(Product).order_by(func.random()).limit(1) 
+        product = db.session.execute(prod_stmt).scalar() 
+        rand_qty = random.randint(10, 20) 
+        association_2 = ProductOrder(order=order, product=product, quantity=rand_qty) 
+        db.session.add(association_2) 
+        
+        # Commit to the database 
+        db.session.commit() 
 
 if __name__ == '__main__':
     # Example usage
-    # drop_all_tables()
-    # create_all_tables()
-    # import_data_from_csv('./data/customers.csv', './data/products.csv')
+    drop_all_tables()
+    create_all_tables()
+    import_data_from_csv('./data/customers.csv', './data/products.csv')
     randomize_orders()

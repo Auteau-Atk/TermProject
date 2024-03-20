@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from pathlib import Path
 from db import db
-from models import Customer, Product
+from models import Customer, Product, Order, ProductOrder
 
 app = Flask(__name__)
 
@@ -21,16 +21,13 @@ def home():
 
 @app.route('/customers')
 def show_customers():
-    """Route to display a list of customers."""
     statement = db.select(Customer).order_by(Customer.name)
-    print(type(statement))
     records = db.session.execute(statement)
     customers = records.scalars()
     return render_template('customers.html', customers=customers)
 
 @app.route('/products')
 def show_products():
-    """Route to display a list of products."""
     statement = db.select(Product).order_by(Product.name)
     records = db.session.execute(statement)
     products = records.scalars()
@@ -75,6 +72,28 @@ customer_id)).scalar()
     db.session.commit()
 
     return "deleted"
+
+@app.route("/orders")
+def show_orders(): 
+    """Route to display a list of customers."""
+    statement = db.select(Order).order_by(Order.total)
+    records = db.session.execute(statement)
+    orders = records.scalars()
+    return render_template('orders.html', orders=orders)
+
+@app.route("/orders/<int:order_id>")
+def specific_orders(order_id): 
+    statement = db.select(Order).where(Order.id == order_id) 
+    result = db.session.execute(statement).scalar()
+
+    return render_template('specific_order.html', order=result)
+
+@app.route("/product_orders")
+def show_product_orders(): 
+    statement = db.select(ProductOrder).order_by(ProductOrder.quantity)
+    records = db.session.execute(statement)
+    product_orders = records.scalars()
+    return render_template('product_orders.html', product_orders=product_orders)
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
