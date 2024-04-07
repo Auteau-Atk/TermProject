@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, redirect, jsonify, url_for, request
 from csv import DictReader
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
@@ -73,13 +73,35 @@ customer_id)).scalar()
 
     return "deleted"
 
-@app.route("/orders")
-def show_orders(): 
-    """Route to display a list of customers."""
-    statement = db.select(Order).order_by(Order.total)
-    records = db.session.execute(statement)
-    orders = records.scalars()
-    return render_template('orders.html', orders=orders)
+@app.route("/api/orders", methods=["POST"])
+def accept_orders():
+    if request.method == "POST":
+        data = {
+        'customer_id': request.form['customer_id'],
+        'items': [
+        {"name": request.form['item'],'quantity': request.form['quantity']}
+        ]
+    }
+
+        return jsonify({"message": "Order submitted successfully"})
+
+    return jsonify({"error": "Method Not Allowed"}), 405
+
+@app.route("/api/orders", methods=["GET"])
+def submit_orders():
+    return render_template('send_order.html')
+
+
+@app.route('/orders/<int:order_id>/delete', methods=['POST'])
+def delete_order(order_id):
+    order = Order.query.get_or_404(order_id)
+    db.session.delete(order)
+    db.session.commit()
+    return redirect(url_for('show_orders'))
+
+@app.route("/orders/<int:order_id>/delete", methods=["GET"])
+def remove_orders(order_id):
+    return render_template('delete_order.html', order_id=order_id)
 
 @app.route("/orders/<int:order_id>")
 def specific_orders(order_id): 
@@ -87,6 +109,13 @@ def specific_orders(order_id):
     result = db.session.execute(statement).scalar()
 
     return render_template('specific_order.html', order=result)
+
+@app.route("/orders")
+def show_orders(): 
+    statement = db.select(Order).order_by(Order.total)
+    records = db.session.execute(statement)
+    orders = records.scalars()
+    return render_template('orders.html', orders=orders)
 
 @app.route("/product_orders")
 def show_product_orders(): 

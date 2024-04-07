@@ -5,6 +5,7 @@
 {% for order in orders %}
 <p>
     <span>CustomerID: {{ order.customer_id }}</span>
+    <span>OrderID: {{ order.id }}</span>
     <span>Total: {{ order.total }}</span>
 </p>
 {% endfor %}

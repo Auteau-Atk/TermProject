@@ -66,3 +66,5 @@ if __name__ == '__main__':
     create_all_tables()
     import_data_from_csv('./data/customers.csv', './data/products.csv')
     randomize_orders()
+    randomize_orders()
+    randomize_orders()

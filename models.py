@@ -40,7 +40,7 @@ class Order(db.Model):
     total = mapped_column(Numeric, nullable=True)
     customer = relationship("Customer", back_populates="orders")
 
-    product_orders = relationship("ProductOrder")
+    product_orders = relationship("ProductOrder", cascade="all, delete-orphan")
     
 class ProductOrder(db.Model):
     id = mapped_column(Integer, primary_key=True)
