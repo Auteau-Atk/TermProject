@@ -1,128 +1,219 @@
-from flask import Flask, render_template, redirect, jsonify, url_for, request
-from csv import DictReader
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase
-from pathlib import Path
-from db import db
-from models import Customer, Product, Order, ProductOrder
+# from flask import Flask, render_template, redirect, jsonify, url_for, request
+# from csv import DictReader
+# from flask_sqlalchemy import SQLAlchemy
+# from sqlalchemy.sql import functions as func
+# from sqlalchemy.orm import DeclarativeBase
+# from pathlib import Path
+# from db import db
+# from models import Customer, Product, Order, ProductOrder
 
-app = Flask(__name__)
+# app = Flask(__name__)
 
-# This will make Flask use a 'sqlite' database with the filename provided
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///main_database.db"
-# This will make Flask store the database file in the path provided
-app.instance_path = Path("data").resolve()  
-# Adjust to your needs / liking. Most likely, you want to use "." for your instance path. You may also use "data".
-db.init_app(app)
+# app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///main_database.db"
 
-@app.route('/')
-def home():
-    return render_template('base.html')
+# app.instance_path = Path("data").resolve()  
 
-@app.route('/customers')
-def show_customers():
-    statement = db.select(Customer).order_by(Customer.name)
-    records = db.session.execute(statement)
-    customers = records.scalars()
-    return render_template('customers.html', customers=customers)
+# db.init_app(app)
 
-@app.route('/products')
-def show_products():
-    statement = db.select(Product).order_by(Product.name)
-    records = db.session.execute(statement)
-    products = records.scalars()
-    return render_template('products.html', products=products)
+# @app.route('/')
+# def home():
+#     return render_template('base.html')
 
-@app.route("/api/customers")
-def customers_json(): 
-    statement = db.select(Customer).order_by(Customer.name) 
-    results = db.session.execute(statement) 
-    print(type(results))
-    customers = [] # output variable 
-    for customer in results.scalars():
-        json_record = { 
-            "id": customer.id, 
-            "name": customer.name, 
-            "phone": customer.phone, 
-            "balance": customer.balance, 
-        } 
-        customers.append(json_record) 
+# @app.route('/customers')
+# def show_customers():
+#     statement = db.select(Customer).order_by(Customer.name)
+#     records = db.session.execute(statement)
+#     customers = records.scalars()
+#     return render_template('customers.html', customers=customers)
 
-    return jsonify(customers)
+# @app.route('/products')
+# def show_products():
+#     statement = db.select(Product).order_by(Product.name)
+#     records = db.session.execute(statement)
+#     products = records.scalars()
+#     return render_template('products.html', products=products)
 
-@app.route("/api/customers/<int:customer_id>")
-def customer_detail_json(customer_id): 
-    statement = db.select(Customer).where(Customer.id == customer_id) 
-    result = db.session.execute(statement).scalar()
+# @app.route("/api/customers", methods=["POST"])
+# def add_customer(): 
+#     data = request.get_json()
+#     if not data:
+#         return jsonify({"error": "Data not found"}), 400
+#     with app.app_context():
+#         new_customer = Customer(name=data['name'], phone=data['phone'])
+#         db.session.add(new_customer)
+#         db.session.commit()
+#     return jsonify({"success": "Data found"}), 201
+
+# @app.route("/customer/<int:customer_id>")
+# def customer_detail(customer_id):
+#     customer = Customer.query.get(customer_id)
     
-    json_record = { 
-            "id": result.id, 
-            "name": result.name, 
-            "phone": result.phone, 
-            "balance": result.balance, 
-        }
+#     orders = Order.query.filter_by(customer_id=customer_id).all()
+    
+#     return render_template('customer_detail.html', customer=customer, orders=orders)
 
-    return jsonify(json_record)
+# @app.route("/api/customers/<int:customer_id>", methods=["PUT"])
+# def update_customer(customer_id): 
+#     data = request.get_json()
+#     if not data:
+#         return jsonify({"error": "Data not found"}), 404
+#     customer = db.get_or_404(Customer, customer_id) 
 
-@app.route("/api/customers/<int:customer_id>", methods=["DELETE"])
-def customer_delete(customer_id): 
-    customer = db.session.execute(db.select(Customer).where(Customer.id == 
-customer_id)).scalar() 
-    db.session.delete(customer) 
-    db.session.commit()
+#     if "balance" not in data:
+#         return "Invalid request", 400 
+    
+#     balance = data["balance"]
+#     if not isinstance(balance, (int, float)): 
+#         return "Invalid request: balance", 400 
+    
+#     customer.balance = balance  # corrected this line
+    
+#     db.session.commit() 
+#     return jsonify({"success": "Data found"}), 204
 
-    return "deleted"
+# @app.route("/api/customers/<int:customer_id>", methods=["DELETE"])
+# def customer_delete(customer_id): 
+#     statement = db.select(Customer).where(Customer.id == customer_id) 
+#     result = db.session.execute(statement).scalar()
+#     if not result:
+#         return jsonify({"error": "Customer not found"}), 404
+#     db.session.delete(result) 
+#     db.session.commit()
+#     return jsonify({'status': 'success'}), 204
 
-@app.route("/api/orders", methods=["POST"])
-def accept_orders():
-    if request.method == "POST":
-        data = {
-        'customer_id': request.form['customer_id'],
-        'items': [
-        {"name": request.form['item'],'quantity': request.form['quantity']}
-        ]
-    }
+# # Products
+# @app.route("/api/products", methods=["POST"])
+# def add_products(): 
+#     data = request.get_json()
+#     if not data:
+#         return jsonify({"error": "Data not found"}), 400
+#     with app.app_context():
+#         new_product = Customer(name=data['name'], phone=data['price'])
+#         db.session.add(new_product)
+#         db.session.commit()
+#     return jsonify({"success": "Data found"}), 201
 
-        return jsonify({"message": "Order submitted successfully"})
+# @app.route("/api/products/<int:product_id>", methods=["PUT"])
+# def update_products(product_id): 
+#     data = request.get_json()
+#     if not data:
+#         return jsonify({"error": "Data not found"}), 404
+#     product = db.get_or_404(Product, product_id)
 
-    return jsonify({"error": "Method Not Allowed"}), 405
+#     if "name" not in data or "price" not in data:
+#         return "Invalid request", 400 
+    
+#     name = data["name"]
+#     price = data["price"]
+#     if not isinstance(price, (int, float)): 
+#         return "Invalid request: balance", 400 
+    
+#     product.name = name
+#     product.price = price
+    
+#     db.session.commit() 
+#     return jsonify({"success": "Data found"}), 204
 
-@app.route("/api/orders", methods=["GET"])
-def submit_orders():
-    return render_template('send_order.html')
+# @app.route("/api/products/<int:product_id>", methods=["DELETE"])
+# def customer_products(product_id): 
+#     statement = db.select(Product).where(Product.id == product_id) 
+#     result = db.session.execute(statement).scalar()
+#     if not result:
+#         return jsonify({"error": "Product not found"}), 404
+#     db.session.delete(result) 
+#     db.session.commit()
+#     return jsonify({'status': 'success'}), 204
 
+# @app.route("/api/customers/<int:customer_id>")
+# def customer_detail_json(customer_id): 
+#     statement = db.select(Customer).where(Customer.id == customer_id) 
+#     result = db.session.execute(statement).scalar()
+#     return jsonify(result.to_json())
 
-@app.route('/orders/<int:order_id>/delete', methods=['POST'])
-def delete_order(order_id):
-    order = Order.query.get_or_404(order_id)
-    db.session.delete(order)
-    db.session.commit()
-    return redirect(url_for('show_orders'))
+# @app.route("/api/orders", methods=["POST"])
+# def add_order():
+#     data = request.get_json()
+#     if not data:
+#         return jsonify({"error": "Data not found"}), 400
+    
+#     customer = db.get_or_404(Customer, data['customer_id'])
+#     if not customer:
+#         return jsonify({"error": "Customer not found"}), 404
+    
+#     if not data.get('items'):
+#         return jsonify({"error": "No items found"}), 404
+    
+#     with app.app_context():
+#         order = Order(customer_id=customer.id, total=len(data['items']))
+#         db.session.add(order)
+#         db.session.commit()
+    
+#     for i in data['items']:
+#         statement = db.select(Product).where(Product.name == i['name']) 
+#         result = db.session.execute(statement).scalar()
+        
+#         if not result:
+#             return jsonify({"error": "Product not found"}), 404
+        
+#     return jsonify({"success": "Data found"}), 201
 
-@app.route("/orders/<int:order_id>/delete", methods=["GET"])
-def remove_orders(order_id):
-    return render_template('delete_order.html', order_id=order_id)
+# @app.route('/orders/<int:order_id>/delete', methods=['POST'])
+# def delete_order(order_id):
+#     order = Order.query.get_or_404(order_id)
+#     if order.processed:
+#         return redirect(url_for('show_orders'))
+#     db.session.delete(order)
+#     db.session.commit()
+#     return redirect(url_for('show_orders'))
 
-@app.route("/orders/<int:order_id>")
-def specific_orders(order_id): 
-    statement = db.select(Order).where(Order.id == order_id) 
-    result = db.session.execute(statement).scalar()
+# @app.route("/orders/<int:order_id>")
+# def specific_orders(order_id): 
+#     statement = db.select(Order).where(Order.id == order_id) 
+#     result = db.session.execute(statement).scalar()
 
-    return render_template('specific_order.html', order=result)
+#     return render_template('specific_order.html', order=result)
 
-@app.route("/orders")
-def show_orders(): 
-    statement = db.select(Order).order_by(Order.total)
-    records = db.session.execute(statement)
-    orders = records.scalars()
-    return render_template('orders.html', orders=orders)
+# @app.route("/orders")
+# def show_orders(): 
+#     statement = db.select(Order)
+#     records = db.session.execute(statement)
+#     orders = records.scalars()
+#     for i in orders:
+#         i.total = i.price
+#         print(i.total)
+#     return render_template('orders.html', orders=orders)
 
-@app.route("/product_orders")
-def show_product_orders(): 
-    statement = db.select(ProductOrder).order_by(ProductOrder.quantity)
-    records = db.session.execute(statement)
-    product_orders = records.scalars()
-    return render_template('product_orders.html', product_orders=product_orders)
+# @app.route('/api/orders/<int:order_id>', methods=['PUT'])
+# def process_order(order_id):
+#     data = request.get_json()
+#     if not data:
+#         return jsonify({"error": "Order not found"}), 404
+#     if data['process'] != True:
+#         return jsonify({"error": "Order ignored"}), 400
+    
+#     order = db.get_or_404(Order, order_id)
+#     if not data.get("strategy"):
+#         test = order.process()
+#     else:
+#         test = order.process(data["strategy"])
+#     if test:
+#         return jsonify({"success": "Found"}), 201
 
-if __name__ == '__main__':
-    app.run(debug=True, port=8080)
+# @app.route('/orders/<int:id>/process', methods=['POST'])
+# def process(id):
+#     order = Order.query.get_or_404(id)
+#     if order.processed:
+#         return redirect(url_for('show_orders'))
+#     order.process()
+#     db.session.commit()
+#     return redirect(url_for('show_orders'))
+
+# @app.route("/product_orders")
+# def show_product_orders(): 
+#     statement = db.select(ProductOrder).order_by(ProductOrder.quantity)
+#     records = db.session.execute(statement)
+#     product_orders = records.scalars()
+#     return render_template('product_orders.html', product_orders=product_orders)
+
+# if __name__ == '__main__':
+#     app.run(debug=True, port=8080)

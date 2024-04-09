@@ -4,8 +4,11 @@
 <h1>Products</h1>
 {% for product in products %}
 <p>
-    <span>{{ product.name }}</span>
+    <span>ID:{{ product.id }}</span>
+    <span>Name: {{ product.name }}</span>
     <span>Price: {{ product.price }}</span>
+    <span>In Stock: {{ product.available }}</span>
 </p>
 {% endfor %}
 {% endblock %}
+

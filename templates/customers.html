@@ -4,8 +4,10 @@
 <h1>Customers</h1>
 {% for customer in customers %}
 <p>
-    <span>{{ customer.name }}</span>
-    <span>{{ customer.phone }}</span>
+    <a href="{{ url_for('pages.get_customer', id=customer_id) }}">Customer ID {{ customer_id }}</a>
+    <span>Name: {{ customer.name }}</span>
+    <span>Phone: {{ customer.phone }}</span>
+    <span>Balance: ${{ customer.balance }}</span>
 </p>
 {% endfor %}
 {% endblock %}

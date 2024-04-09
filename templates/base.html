@@ -6,11 +6,10 @@
     </head>
     <body>
         <nav>
-            <a href="/">Home</a>
-            <a href="/customers">Customers</a>
-            <a href="/products">Products</a>
-            <a href="/orders">Orders</a>
-            <a href="/product_orders">Product Orders</a>
+            <a href="{{ url_for('pages.homepage') }}">Home</a>
+            <a href="{{ url_for('pages.get_customers') }}">Customers</a>
+            <a href="{{ url_for('pages.get_products') }}">Products</a>
+            <a href="{{ url_for('pages.get_orders') }}">Orders</a>
         </nav>
         <ul> 
             {% for element in my_list %} 

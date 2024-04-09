@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "bootstrap": "^5.3.3",
     "flask": "^0.2.10",
     "passport-github2": "^0.1.12"
   }

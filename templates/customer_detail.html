@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<body>
+    <h1>Customer Details</h1>
+    <p>Customer ID: {{ customer.id }}</p>
+    <p>Name: {{ customer.name }}</p>
+    <!-- Display other customer details as needed -->
+
+    <h2>Orders</h2>
+    <ul>
+        {% for order in orders %}
+            <li><a href="/orders/{{ order.id }}">Order ID: {{ order.id }}</a></li>
+            <!-- Display other order details as needed -->
+        {% endfor %}
+    </ul>
+</body>
+{% endblock %}

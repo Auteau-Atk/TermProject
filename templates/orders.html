@@ -5,8 +5,16 @@
 {% for order in orders %}
 <p>
     <span>CustomerID: {{ order.customer_id }}</span>
-    <span>OrderID: {{ order.id }}</span>
+    <a href="/orders/{{ order.id }}">Order ID: {{ order.id }}</a>
     <span>Total: {{ order.total }}</span>
+    <span>Created: {{ order.created }}</span>
+    <span>Process: {{ order.processed }}</span>
+    <form method="POST" action="{{ url_for('pages.delete_order', id=id) }}"> 
+        <button type="submit">Delete</button>
+        </form>
+    <form action="/orders/{{ order.id }}/process" method="post">
+        <input type="submit" value="Process">
+    </form>
 </p>
 {% endfor %}
 {% endblock %}
